@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ethers } from 'ethers'
 import ABI from './ABI.json'
-//import ERC20ABI from './ERC20ABI.json'
+import Notification from './Notification';
 import Trump from './assets/Trump.png'
 import Biden from './assets/Biden.png'
 
@@ -24,11 +24,15 @@ function App() {
   const [rewards, setRewards] = useState(0)
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [notification, setNotification] = useState({ message: '', show: false });
 
   const handleChange = (event) => {
     setValue(event.target.value)
   }
+
+  const showNotification = (message) => {
+    setNotification({ message, show: true });
+  };
 
   const connect = async () => {
     setLoading(true)
@@ -116,17 +120,18 @@ function App() {
             setMarketEnded(true)
           }
         } else {
-          alert('Sign in failed')
+          showNotification('Connection failed!');
         }
         setName(userName);
         setConnected(true);
+        showNotification('Connected!');
       }
     } catch (error) {
       console.log(error)
     }
     setLoading(false);
   };
-  
+
 
   const Bet = async (choice) => {
     try {
@@ -145,8 +150,9 @@ function App() {
       const [trumpBets, bidenBets] = await readOnlyContract.getTotalBets()
       setTotalTrumpBets(ethers.formatEther(trumpBets))
       setTotalBidenBets(ethers.formatEther(bidenBets))
-      alert('Bet placed successfully!')
+      showNotification('Bet placed successfully!');
     } catch (error) {
+      showNotification('Error placing bet!')
       console.log(error)
     }
     setLoading(false)
@@ -168,8 +174,9 @@ function App() {
       const [trumpBets, bidenBets] = await readOnlyContract.getTotalBets()
       setTotalTrumpBets(ethers.formatEther(trumpBets))
       setTotalBidenBets(ethers.formatEther(bidenBets))
-      alert('Bet cancelled successfully!')
+      showNotification('Bet cancelled successfully!');
     } catch (error) {
+      showNotification('Error cancelling bet!')
       console.log(error)
     }
     setLoading(false)
@@ -184,8 +191,9 @@ function App() {
       const tx = await _contract.closeMarket(winner)
       await tx.wait()
       setMarketEnded(true)
-      alert('Market ended successfully!')
+      showNotification('Voting ended successfully!');
     } catch (error) {
+      showNotification('Error ending market!')
       console.log(error)
     }
     setLoading(false)
@@ -199,8 +207,9 @@ function App() {
       const _contract = new ethers.Contract(voteOrDieAddress, ABI, _signer)
       const tx = await _contract.claimWinnings()
       await tx.wait()
-      alert('Winnings claimed successfully!')
+      showNotification('Winnings claimed successfully!');
     } catch (error) {
+      showNotification('Error claiming winnings!')
       console.log(error)
     }
     setLoading(false)
@@ -224,64 +233,68 @@ function App() {
             <div className="loader"></div>
           </div>
         )}
-        {!connected && <button onClick={connect}>Connect</button>}
-        {!marketEnded && (
-          <>
-            {connected && (
-              <>
-                <div className='buttons'>
-                  <img className='candidate' src={Trump} alt='Trump' />
-                  <img className='candidate' src={Biden} alt='Biden' />
-                  <button className='trump' onClick={() => Bet(0)}>TRUMP</button>
-                  <button className='biden' onClick={() => Bet(1)}>BIDEN</button>
-                  <button className='cancel' onClick={cancelBet}>Cancel Bet</button>
-                </div>
-                <div className='input-container'>
-                  <input
-                    onChange={handleChange}
-                    placeholder='place your bet'
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    className={hovered ? 'shimmer' : ''}
-                  />
-                </div>
+      <Notification
+        message={notification.message}
+        show={notification.show}
+        setShow={(show) => setNotification({ ...notification, show })} />
+      {!connected && <button onClick={connect}>Connect</button>}
+      {!marketEnded && (
+        <>
+          {connected && (
+            <>
+              <div className='buttons'>
+                <img className='candidate' src={Trump} alt='Trump' />
+                <img className='candidate' src={Biden} alt='Biden' />
+                <button className='trump' onClick={() => Bet(0)}>TRUMP</button>
+                <button className='biden' onClick={() => Bet(1)}>BIDEN</button>
+                <button className='cancel' onClick={cancelBet}>Cancel Bet</button>
+              </div>
+              <div className='input-container'>
+                <input
+                  onChange={handleChange}
+                  placeholder='place your bet'
+                  onMouseEnter={() => setHovered(true)}
+                  onMouseLeave={() => setHovered(false)}
+                  className={hovered ? 'shimmer' : ''}
+                />
+              </div>
 
-                <div className='totals'>
-                  <p className='mobile'><strong>TRUMP: </strong> {totalTrumpBets} ETH</p>
-                  <div className='id'>
-                    <strong>{name}</strong>
-                  </div>
-                  <p className='mobile'><strong>BIDEN: </strong> {totalBidenBets} ETH</p>
-                  <p className='rewards'>Freedom Units: {rewards} FU</p>
+              <div className='totals'>
+                <p className='mobile'><strong>TRUMP: </strong> {totalTrumpBets} ETH</p>
+                <div className='id'>
+                  <strong>{name}</strong>
                 </div>
-                {parseFloat(userBetAmount) > 0 ? (
-                  <p>Your Bet: {userBetAmount} ETH on {userBetChoice === 0 ? 'Trump' : 'Biden'}</p>
-                ) : (
-                  <p>No bet placed</p>
-                )}
-                {admin && (
-                  <>
-                    <div className='end-buttons'>
-                      <button onClick={() => endMarket(winner)}>End Market</button>
-                      <select onChange={handleWinner}>
-                        <option value='0'>Trump</option>
-                        <option value='1'>Biden</option>
-                      </select>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </>
-        )}
-        {marketEnded && (
-          <>
-            <p>You won: {winnings} ETH</p>
-            <button onClick={claim}>Claim Winnings</button>
-          </>
-        )}
-      </div>
+                <p className='mobile'><strong>BIDEN: </strong> {totalBidenBets} ETH</p>
+                <p className='rewards'>Freedom Units: {rewards} FU</p>
+              </div>
+              {parseFloat(userBetAmount) > 0 ? (
+                <p>Your Bet: {userBetAmount} ETH on {userBetChoice === 0 ? 'Trump' : 'Biden'}</p>
+              ) : (
+                <p>No bet placed</p>
+              )}
+              {admin && (
+                <>
+                  <div className='end-buttons'>
+                    <button onClick={() => endMarket(winner)}>End Market</button>
+                    <select onChange={handleWinner}>
+                      <option value='0'>Trump</option>
+                      <option value='1'>Biden</option>
+                    </select>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
+      {marketEnded && (
+        <>
+          <p>You won: {winnings} ETH</p>
+          <button onClick={claim}>Claim Winnings</button>
+        </>
+      )}
     </div>
+    </div >
   )
 }
 

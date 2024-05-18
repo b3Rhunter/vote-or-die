@@ -208,6 +208,26 @@ select option:hover {
   animation: shimmer 1s infinite;
 }
 
+.notification {
+  position: fixed;
+  top: 40px;
+  right: -100px;
+  padding: 1em;
+  border-radius: 1em;
+  border: 1px solid rgba(255, 255, 255, 0.186);
+  background-color: #030b00;
+  transition: 0.3s;
+  transition: right 0.5s ease-in-out;
+}
+
+.notification.show {
+  right: 40px; /* Slide in */
+}
+
+.notification.hide {
+  right: -100%; /* Slide out */
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -226,6 +246,24 @@ select option:hover {
   }
   100% {
     border-color: rgba(1, 240, 1, 0.186);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
   }
 }
 
