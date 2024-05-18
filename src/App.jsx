@@ -24,6 +24,7 @@ function App() {
   const [rewards, setRewards] = useState(0)
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [metamask, setMetamask] = useState(false);
   const [notification, setNotification] = useState({ message: '', show: false });
 
   const handleChange = (event) => {
@@ -39,6 +40,8 @@ function App() {
     let provider;
     try {
       if (window.ethereum == null) {
+        setMetamask(true);
+        showNotification('MetaMask not installed!');
         console.log("MetaMask not installed; using read-only defaults");
         provider = ethers.getDefaultProvider();
       } else {
@@ -124,6 +127,7 @@ function App() {
         }
         setName(userName);
         setConnected(true);
+        setMetamask(false);
         showNotification('Connected!');
       }
     } catch (error) {
@@ -224,6 +228,10 @@ function App() {
     }
   }
 
+  const installMetamask = () => {
+    window.open('https://metamask.io/download.html', '_blank');
+  };
+
   return (
     <div className='app'>
       <div className='main'>
@@ -233,67 +241,68 @@ function App() {
             <div className="loader"></div>
           </div>
         )}
-      <Notification
-        message={notification.message}
-        show={notification.show}
-        setShow={(show) => setNotification({ ...notification, show })} />
-      {!connected && <button onClick={connect}>Connect</button>}
-      {!marketEnded && (
-        <>
-          {connected && (
-            <>
-              <div className='buttons'>
-                <img className='candidate' src={Trump} alt='Trump' />
-                <img className='candidate' src={Biden} alt='Biden' />
-                <button className='trump' onClick={() => Bet(0)}>TRUMP</button>
-                <button className='biden' onClick={() => Bet(1)}>BIDEN</button>
-                <button className='cancel' onClick={cancelBet}>Cancel Bet</button>
-              </div>
-              <div className='input-container'>
-                <input
-                  onChange={handleChange}
-                  placeholder='place your bet'
-                  onMouseEnter={() => setHovered(true)}
-                  onMouseLeave={() => setHovered(false)}
-                  className={hovered ? 'shimmer' : ''}
-                />
-              </div>
-
-              <div className='totals'>
-                <p className='mobile'><strong>TRUMP: </strong> {totalTrumpBets} ETH</p>
-                <div className='id'>
-                  <strong>{name}</strong>
+        <Notification
+          message={notification.message}
+          show={notification.show}
+          setShow={(show) => setNotification({ ...notification, show })} />
+        {!connected && <button onClick={connect}>Connect</button>}
+        {metamask && <button onClick={installMetamask}>Install MetaMask</button>}
+        {!marketEnded && (
+          <>
+            {connected && (
+              <>
+                <div className='buttons'>
+                  <img className='candidate' src={Trump} alt='Trump' />
+                  <img className='candidate' src={Biden} alt='Biden' />
+                  <button className='trump' onClick={() => Bet(0)}>TRUMP</button>
+                  <button className='biden' onClick={() => Bet(1)}>BIDEN</button>
+                  <button className='cancel' onClick={cancelBet}>Cancel Bet</button>
                 </div>
-                <p className='mobile'><strong>BIDEN: </strong> {totalBidenBets} ETH</p>
-                <p className='rewards'>Freedom Units: {rewards} FU</p>
-              </div>
-              {parseFloat(userBetAmount) > 0 ? (
-                <p>Your Bet: {userBetAmount} ETH on {userBetChoice === 0 ? 'Trump' : 'Biden'}</p>
-              ) : (
-                <p>No bet placed</p>
-              )}
-              {admin && (
-                <>
-                  <div className='end-buttons'>
-                    <button onClick={() => endMarket(winner)}>End Market</button>
-                    <select onChange={handleWinner}>
-                      <option value='0'>Trump</option>
-                      <option value='1'>Biden</option>
-                    </select>
+                <div className='input-container'>
+                  <input
+                    onChange={handleChange}
+                    placeholder='place your bet'
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    className={hovered ? 'shimmer' : ''}
+                  />
+                </div>
+
+                <div className='totals'>
+                  <p className='mobile'><strong>TRUMP: </strong> {totalTrumpBets} ETH</p>
+                  <div className='id'>
+                    <strong>{name}</strong>
                   </div>
-                </>
-              )}
-            </>
-          )}
-        </>
-      )}
-      {marketEnded && (
-        <>
-          <p>You won: {winnings} ETH</p>
-          <button onClick={claim}>Claim Winnings</button>
-        </>
-      )}
-    </div>
+                  <p className='mobile'><strong>BIDEN: </strong> {totalBidenBets} ETH</p>
+                  <p className='rewards'>Freedom Units: {rewards} FU</p>
+                </div>
+                {parseFloat(userBetAmount) > 0 ? (
+                  <p>Your Bet: {userBetAmount} ETH on {userBetChoice === 0 ? 'Trump' : 'Biden'}</p>
+                ) : (
+                  <p>No bet placed</p>
+                )}
+                {admin && (
+                  <>
+                    <div className='end-buttons'>
+                      <button onClick={() => endMarket(winner)}>End Market</button>
+                      <select onChange={handleWinner}>
+                        <option value='0'>Trump</option>
+                        <option value='1'>Biden</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </>
+        )}
+        {marketEnded && (
+          <>
+            <p>You won: {winnings} ETH</p>
+            <button onClick={claim}>Claim Winnings</button>
+          </>
+        )}
+      </div>
     </div >
   )
 }
