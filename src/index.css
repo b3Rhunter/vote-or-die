@@ -160,6 +160,12 @@ select option:hover {
   margin-bottom: 20px;
 }
 
+.rewards {
+  position: fixed;
+  bottom: 10px;
+  left: 20px;
+}
+
 .loading-cont {
   position: fixed;
   top: 0;

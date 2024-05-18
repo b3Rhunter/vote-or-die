@@ -9,7 +9,7 @@
 	{
 		"inputs": [
 			{
-				"internalType": "enum PredictionMarket.Candidate",
+				"internalType": "enum VoteOrDie.Candidate",
 				"name": "_outcome",
 				"type": "uint8"
 			}
@@ -20,9 +20,16 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "emergencyReturnFunds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
-				"internalType": "enum PredictionMarket.Candidate",
+				"internalType": "enum VoteOrDie.Candidate",
 				"name": "_choice",
 				"type": "uint8"
 			}
@@ -33,7 +40,13 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_rewardToken",
+				"type": "address"
+			}
+		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
 	},
@@ -53,9 +66,14 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "enum PredictionMarket.Candidate",
+				"internalType": "enum VoteOrDie.Candidate",
 				"name": "choice",
 				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -114,9 +132,14 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "enum PredictionMarket.Candidate",
+				"internalType": "enum VoteOrDie.Candidate",
 				"name": "choice",
 				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -140,7 +163,7 @@
 		"name": "outcome",
 		"outputs": [
 			{
-				"internalType": "enum PredictionMarket.Candidate",
+				"internalType": "enum VoteOrDie.Candidate",
 				"name": "",
 				"type": "uint8"
 			}
@@ -154,6 +177,45 @@
 		"outputs": [
 			{
 				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "projectedTokenReward",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "rewardRate",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "rewardToken",
+		"outputs": [
+			{
+				"internalType": "contract FreedomUnits",
 				"name": "",
 				"type": "address"
 			}

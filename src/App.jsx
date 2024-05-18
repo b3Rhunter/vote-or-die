@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { ethers } from 'ethers'
 import ABI from './ABI.json'
+//import ERC20ABI from './ERC20ABI.json'
 import Trump from './assets/Trump.png'
 import Biden from './assets/Biden.png'
 
 function App() {
 
-  const contractAddress = '0xaFd0052350B570d9E3A04c7FFD118C7d103BB58d'
+  const voteOrDieAddress = '0xa38F9e4344cDCF34Efe37Bf5Dc9F582cD46bf54f'
+  //const freedomUnitsAddress = '0x258Cefaa251fFeB2C6d55ab6B7794514370e3E6F'
+
   const [connected, setConnected] = useState(false)
   const [name, setName] = useState('')
   const [value, setValue] = useState(0)
@@ -18,6 +21,7 @@ function App() {
   const [userBetChoice, setUserBetChoice] = useState(null)
   const [marketEnded, setMarketEnded] = useState(false)
   const [winnings, setWinnings] = useState(0)
+  const [rewards, setRewards] = useState(0)
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -75,7 +79,7 @@ function App() {
         } else {
           userName = address.substr(0, 6) + "...";
         }
-        const readOnlyContract = new ethers.Contract(contractAddress, ABI, provider)
+        const readOnlyContract = new ethers.Contract(voteOrDieAddress, ABI, provider)
         const owner = await readOnlyContract.owner()
         const [trumpBets, bidenBets] = await readOnlyContract.getTotalBets()
         setTotalTrumpBets(ethers.formatEther(trumpBets))
@@ -83,6 +87,15 @@ function App() {
         const [userBetAmount, userBetChoice] = await readOnlyContract.getUserBet(address)
         setUserBetAmount(ethers.formatEther(userBetAmount))
         setUserBetChoice(userBetChoice)
+        try {
+          const contract = new ethers.Contract(voteOrDieAddress, ABI, signer)
+          const rewards = await contract.projectedTokenReward()
+          const rewardsString = ethers.formatEther(rewards);
+          const formattedRewards = rewardsString.substring(0, rewardsString.indexOf('.') + 4); // Get the substring up to 3 decimal places
+          setRewards(formattedRewards);
+        } catch (error) {
+          setRewards(0)
+        }
         const endCheck = await readOnlyContract.marketClosed()
         const message = "sign in"
         const sig = await signer.signMessage(message);
@@ -120,12 +133,12 @@ function App() {
       setLoading(true)
       const _provider = new ethers.BrowserProvider(window.ethereum)
       const _signer = await _provider.getSigner();
-      const _contract = new ethers.Contract(contractAddress, ABI, _signer)
+      const _contract = new ethers.Contract(voteOrDieAddress, ABI, _signer)
       const betValue = ethers.parseEther(value.toString())
       const tx = await _contract.placeBet(choice, { value: betValue })
       await tx.wait()
       const address = await _signer.getAddress()
-      const readOnlyContract = new ethers.Contract(contractAddress, ABI, _provider)
+      const readOnlyContract = new ethers.Contract(voteOrDieAddress, ABI, _provider)
       const [userBetAmount, userBetChoice] = await readOnlyContract.getUserBet(address)
       setUserBetAmount(ethers.formatEther(userBetAmount))
       setUserBetChoice(userBetChoice)
@@ -144,7 +157,7 @@ function App() {
       setLoading(true)
       const _provider = new ethers.BrowserProvider(window.ethereum)
       const _signer = await _provider.getSigner();
-      const _contract = new ethers.Contract(contractAddress, ABI, _signer)
+      const _contract = new ethers.Contract(voteOrDieAddress, ABI, _signer)
       const tx = await _contract.closeMarket(winner)
       await tx.wait()
       setMarketEnded(true)
@@ -160,7 +173,7 @@ function App() {
       setLoading(true)
       const _provider = new ethers.BrowserProvider(window.ethereum)
       const _signer = await _provider.getSigner();
-      const _contract = new ethers.Contract(contractAddress, ABI, _signer)
+      const _contract = new ethers.Contract(voteOrDieAddress, ABI, _signer)
       const tx = await _contract.claimWinnings()
       await tx.wait()
       alert('Winnings claimed successfully!')
@@ -215,6 +228,7 @@ function App() {
                     <strong>{name}</strong>
                   </div>
                   <p className='mobile'><strong>BIDEN: </strong> {totalBidenBets} ETH</p>
+                  <p className='rewards'>Freedom Units: {rewards} FU</p>
                 </div>
                 {parseFloat(userBetAmount) > 0 ? (
                   <p>Your Bet: {userBetAmount} ETH on {userBetChoice === 0 ? 'Trump' : 'Biden'}</p>
