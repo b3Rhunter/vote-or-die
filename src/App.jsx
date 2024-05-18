@@ -7,8 +7,8 @@ import Biden from './assets/Biden.png'
 
 function App() {
 
-  const voteOrDieAddress = '0xa38F9e4344cDCF34Efe37Bf5Dc9F582cD46bf54f'
-  //const freedomUnitsAddress = '0x258Cefaa251fFeB2C6d55ab6B7794514370e3E6F'
+  const voteOrDieAddress = '0x6a8b47839afeCa8A0709139157dC5Bc810D5c765'
+  //const freedomUnitsAddress = '0x7351D6a45092Ca83092eF4c675182Bb0F294266c'
 
   const [connected, setConnected] = useState(false)
   const [name, setName] = useState('')
@@ -152,6 +152,29 @@ function App() {
     setLoading(false)
   }
 
+  const cancelBet = async () => {
+    try {
+      setLoading(true)
+      const _provider = new ethers.BrowserProvider(window.ethereum)
+      const _signer = await _provider.getSigner();
+      const _contract = new ethers.Contract(voteOrDieAddress, ABI, _signer)
+      const tx = await _contract.cancelBet()
+      await tx.wait()
+      const address = await _signer.getAddress()
+      const readOnlyContract = new ethers.Contract(voteOrDieAddress, ABI, _provider)
+      const [userBetAmount, userBetChoice] = await readOnlyContract.getUserBet(address)
+      setUserBetAmount(ethers.formatEther(userBetAmount))
+      setUserBetChoice(userBetChoice)
+      const [trumpBets, bidenBets] = await readOnlyContract.getTotalBets()
+      setTotalTrumpBets(ethers.formatEther(trumpBets))
+      setTotalBidenBets(ethers.formatEther(bidenBets))
+      alert('Bet cancelled successfully!')
+    } catch (error) {
+      console.log(error)
+    }
+    setLoading(false)
+  }
+
   const endMarket = async () => {
     try {
       setLoading(true)
@@ -211,6 +234,7 @@ function App() {
                   <img className='candidate' src={Biden} alt='Biden' />
                   <button className='trump' onClick={() => Bet(0)}>TRUMP</button>
                   <button className='biden' onClick={() => Bet(1)}>BIDEN</button>
+                  <button className='cancel' onClick={cancelBet}>Cancel Bet</button>
                 </div>
                 <div className='input-container'>
                   <input
